@@ -66,7 +66,6 @@ Specifically, `ans` is the concatenation of two nums arrays. Return the array `a
 
 **Key Lesson**: When an array is divided into two equal sections and elements need to be interleaved, use an offset `(i + n)` to access the corresponding element from the second half.
 
-
 ---
 
 ## 4. Max Consecutive Ones
@@ -88,3 +87,113 @@ Specifically, `ans` is the concatenation of two nums arrays. Return the array `a
 **Mistake**: The initial approach was more complicated than necessary because it compared the current element with the previous element and initialized count to 1. This can introduce edge cases, especially when the first element is 0 or when the array contains only one element. The improved approach starts with count = 0 and directly checks whether the current element is 1.
 
 **Key Lesson**: When solving consecutive-element problems, maintain a running count and reset it when the condition is broken. Keep a separate variable for the maximum value seen so far. This often leads to a simple O(n) time and O(1) space solution.
+
+---
+
+## 5. Set Mismatch
+
+**Description**: You have a set of integers `s`, which originally contains all the numbers from `1` to `n`. Unfortunately, due to some error, one of the numbers in `s` got duplicated to another number in the set, which results in repetition of one number and **loss of another** number.
+
+You are given an integer array `nums` representing the data status of this set after the error.
+
+Find the number that occurs twice and the number that is missing and return them in the form of an array.
+
+**Pattern**: Array Traversal / In-Place Marking
+
+**Inital Thoughts**:
+
+1. Compare adjacent elements to find the duplicate. This only works if the array is sorted and does not directly solve the missing number.
+
+2. Use a `Set` to detect the duplicate, then compare against `1...n` to find the missing number. This works but requires `O(n)` extra space.
+
+**Better Insight**: Because the values should be from 1 to n, track the frequency of each number while traversing the array. A number with frequency 2 is the duplicate, while a number with frequency 0 is missing.
+
+**Solution**:
+
+```py
+duplicate = -1
+for num in nums:
+    idx = abs(num) - 1
+
+    if nums[idx] < 0:
+        duplicate = abs(num)
+    else:
+        nums[idx] = -nums[idx]
+
+missing = -1
+for i in range(len(nums)):
+    if nums[i] > 0:
+        missing = i + 1
+
+return [duplicate, missing]
+```
+
+**Time**: O(n) — two linear traversals are still `O(n)`.
+
+**Space**: O(1) — no additional data structure is used; the input array is modified in place.
+
+**Mistake**: Assuming the duplicate values must be next to each other. The array is not necessarily sorted.
+
+**Key Lesson**: When the values are guaranteed to be from 1 to n, use them as array indices. In-place marking can help detect duplicates and missing values while using O(1) extra space.
+
+## 6. How Many Numbers Are Smaller Than the Current Number
+
+**Description**: Given the array nums, for each `nums[i]` find out how many numbers in the array are smaller than it. That is, for each `nums[i]` you have to count the number of valid `j's` such that `j != i` and `nums[j] < nums[i]`.
+
+Return the answer in an array.
+
+**Pattern**: Sorting / Hash Map
+
+**Inital Thoughts**:
+
+1. Use two loops and compare every number with every other number. This works, but takes O(n²) time.
+
+2. Sort the array and use .index() to find each number's position. This gives the correct count, but .index() searches the array each time, making it inefficient.
+
+**Better Insight**: Sort the numbers → store the first index of each unique number → use that index as its count of smaller numbers.
+
+**Solution**:
+
+```py
+rank = {}
+for index, num in enumerate(sorted(nums)):
+    if num not in rank:
+        rank[num] = index
+return  [rank[num] for num in nums]
+```
+
+**Time**: O(n log n)
+
+**Space**: O(n)
+
+**Mistake**: Using .index() for every number. Since .index() searches from the beginning each time, it adds unnecessary O(n) work for each element.
+
+**Key Lesson**: When sorting puts elements in their natural order, an element's first position can represent how many elements are smaller than it. A dictionary lets you store and reuse that information efficiently.
+
+## 7. Find All Numbers Disappeared in an Array
+
+**Description**: Given an array `nums` of n integers where `nums[i]` is in the range `[1, n]`, return an array of all the integers in the range `[1, n]` that do not appear in `nums`.
+
+**Pattern**: Array Traversal / In-Place Marking
+
+**Inital Thoughts**: Use `set(range(1, n + 1)) - set(nums)` to find the missing numbers. This is simple and readable, but it requires O(n) extra space.
+
+**Better Insight**: Use each number as an index by marking `nums[abs(num) - 1]` as negative; after marking, every index with a positive value represents a missing number (`index + 1`).
+
+**Solution**:
+
+```py
+for num in nums:
+i = abs(num) - 1
+nums[i] = -abs(nums[i])
+
+return [i + 1 for i in range(len(nums)) if nums[i] > 0]
+```
+
+**Time**: 0(n)
+
+**Space**: 0(1)
+
+**Mistake**: Using a set solves the problem but uses extra memory when the input constraints allow an in-place solution.
+
+**Key Lesson**: When values are guaranteed to be in [1, n], use them as indices to mark which numbers have appeared and find the missing ones in O(1) extra space.
