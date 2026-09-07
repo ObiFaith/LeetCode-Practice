@@ -153,37 +153,3 @@ return n_list
 **Mistake**: Forgetting that an `"end"` timestamp is inclusive. That is why the calculation is `timestamp - previous_time + 1`, and why `previous_time` becomes `timestamp + 1`.
 
 **Key Lesson**: For nested execution problems, use a stack to track active functions and a previous timestamp to track unaccounted time. Always pay attention to whether the start/end timestamps are inclusive.
-
-## 4. Final Prices With a Special Discount in a Shop
-
-**Description**: You are given an integer array prices where `prices[i]` is the price of the ith item in a shop.
-
-There is a special discount for items in the shop. If you buy the `ith` item, then you will receive a discount equivalent to `prices[j]` where `j` is the minimum index such that `j > i` and `prices[j]` <= `prices[i]`. Otherwise, you will not receive any discount at all.
-
-Return an integer array answer where answer[i] is the final price you will pay for the `ith` item of the shop, considering the special discount.
-
-**Pattern**: Monotonic Stack / Array Traversal
-
-**Initial Thought**: For each price, scan all prices to its right until finding the first price that is less than or equal to it. This directly follows the problem description but requires nested loops.
-
-**Better Insight**: Use a monotonic stack to store indices whose discount has not been found yet. When the current price is less than or equal to the price at the top of the stack, it is the first valid discount for that item, so pop the index and calculate its final price.
-**Solution**:
-
-```py
- stack = []
-answers = prices.copy()
-for i in range(len(prices)):
-    while stack and prices[stack[-1]] >= prices[i]:
-        j = stack.pop()
-        answers[j] = prices[j] - prices[i]
-    stack.append(i)
-return answers
-```
-
-**Time**: O(n) — each index is pushed and popped at most once.
-
-**Space**: O(n) — the stack can contain up to n indices.
-
-**Mistake**: Using a nested loop makes the solution O(n²) because each price may scan many elements to its right.
-
-**Key Lesson**: When looking for the next smaller or equal element, a monotonic stack can avoid repeated scanning and reduce the solution from O(n²) to O(n).
